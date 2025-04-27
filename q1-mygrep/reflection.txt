@@ -1,0 +1,34 @@
+🧠 Reflective Section
+1. A breakdown of how your script handles arguments and options.
+  my script handles arguments and options as any normal linux utility
+  it first checks first if the first arg is --help this will call a function to show the usage of the utility (first function)
+
+  then, if it's not --help it will proccess it to the next function which is parseOptions (second function)
+  this function will figure out which option does the user will use and it will also validate the corectivity of the given option
+
+  the third function (validateInput), is maded just to validate the user inputs
+    by simply answering these questions:
+      1. is there a pattern to serach about?
+      2. is there a file path has been provided?
+      3. is the provided path exists?
+
+  after doing so, the fourth function (searchFile) will run searching about the user input with the previously maded flags (from parseOptions function)
+  these flags will control the flow of the procesed output
+
+2. A short paragraph: If you were to support regex or -i/-c/-l options, how would your structure change?
+  I think by trying to add regex or -i/-c/-l this make affect alot of different parts of the code like:
+
+    adding new arguments and how to manage these new arguments with regex and i remember that if i would to deal with regex
+    i will have to use (re) which is a libirary that enhance the ability to deal with regex (new dependencies)
+
+    -i: i think this one also will make me think of trying to lower all the chars then comparing them but this will cost bigger memory (i choosed to go with pattern matching)
+
+    and i think that i will need to be very carefull with the user input because it will containe a regex chars which is by default casues alot of problems to get a valid user input
+
+    -l, -c: will would get the file name of only the file that contain the matched pattern, and graping the number of times my tool found the provided pattern
+
+    so, finally i think that i will need to modulize my code more by writing other .sh files, for not complecating the whole utility and make it simple to maintain
+  
+3. What part of the script was hardest to implement and why?
+  the hardest part of the script was how to implement the logic of graping the matched line and also the inverted lines all of this without writing a redundent code
+  making it simple and straight forward
