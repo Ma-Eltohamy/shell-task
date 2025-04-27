@@ -1,74 +1,85 @@
 #!/usr/bin/bash 
 
-if [[ "$1" == "--help" ]]; then
+showUsage() {
   echo "Usage: mygrep.sh [OPTIONS] SEARCH_STRING FILE"
   echo "  -n    Show line numbers"
   echo "  -v    Invert match"
   echo "  -i    Case insensitive search"
-  exit 0
-fi
+}
 
-searchWrod() {
+parseOptions() {
   OPTIND=1
-  shopt -s nocasematch
+  showLineNumber=false
+  invertMatch=false
 
-  local showLineNumber=false
-  local invertMatch=false
-
-  while getopts ":nv" opt; do
+  while getopts ":nvi" opt
+  do
     case $opt in
       n) showLineNumber=true ;;
       v) invertMatch=true ;;
-      \?) echo "Usage: searchWrod [-n] [-v] <pattern> <file>" >&2; 
-          shopt -u nocasematch; return 1 ;;
+      \?) 
+        echo "Invalid option: -$OPTARG" >&2
+        showUsage
+        exit 1
+        ;;
     esac
   done
   shift $((OPTIND - 1))
 
+  userInput="$1"
+  filePath="$2"
+}
+
+validateInput() {
   if [[ -z "$userInput" || -z "$filePath" ]]; then
-    echo "Usage: searchWrod [-n] [-v] <pattern> <file>" >&2
-    shopt -u nocasematch; return 1
+    echo "Error: Missing pattern or file." >&2
+    showUsage
+    exit 1
   fi
 
   if [[ ! -f "$filePath" ]]; then
-    echo "File not found: $filePath" >&2
-    shopt -u nocasematch; return 1
+    echo "Error: File not found: $filePath" >&2
+    exit 1
   fi
+}
 
-  local userInput="$1"
-  local filePath="$2"
-
-  if [[ ! -f "$filePath" ]]
-  then
-    echo "File not found: $filePath"
-    shopt -u nocasematch
-    return 1
-  fi
+searchFile() {
+  shopt -s nocasematch
 
   local lineNumber=0
   while IFS= read -r line
-  do    
-    # I should add the line number each time weather -n or -v or both
-    # line number at the file not the number of the printed line
-  ((lineNumber++))
-  if [[ "$line" == *"$userInput"* ]]
-  then
-    matched=true
-  else
-    matched=false
-  fi
-
-  if [[ "$matched" != "$invertMatch" ]]
-  then
-    if [[ "$showLineNumber" == true ]]
+  do
+    ((lineNumber++))
+    
+    if [[ "$line" == *"$userInput"* ]]
     then
-      echo -n "${lineNumber}: "
+      matched=true
+    else
+      matched=false
     fi
-    echo "$line"
-  fi
 
+    if [[ "$matched" != "$invertMatch" ]]
+    then
+      if [[ "$showLineNumber" == true ]]
+      then
+        echo -n "${lineNumber}: "
+      fi
+      echo "$line"
+    fi
   done < "$filePath"
   shopt -u nocasematch
 }
 
-searchWrod "$@"
+main() {
+  if [[ "$1" == "--help" ]]
+  then
+    showUsage
+    exit 0
+  fi
+
+  parseOptions "$@"
+  validateInput
+  searchFile
+}
+
+main "$@"
